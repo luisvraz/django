@@ -1,0 +1,65 @@
+# render.yaml - Ejemplo para desplegar Django + Postgres + Redis + RQ Worker
+
+# Define los servicios que componen la aplicación
+services:
+  # Servicio Web Principal (Django con Gunicorn)
+  - type: web
+    name: mi-app-django # Nombre del servicio web
+    runtime: python # Especifica el runtime
+    buildCommand: | # Comandos para construir la aplicación
+      pip install --upgrade pip
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput # Recolectar estáticos
+      python manage.py migrate # Ejecutar migraciones durante el build (importante!)
+    startCommand: gunicorn tuproyecto.wsgi:application # Comando para iniciar la app (reemplaza 'tuproyecto')
+    envVars: # Variables de entorno específicas para este servicio
+      - key: PYTHON_VERSION
+        value: 3.11 # Especifica tu versión de Python
+      - key: DJANGO_SETTINGS_MODULE
+        value: tuproyecto.settings # Ruta a tus settings
+      - key: SECRET_KEY
+        generateValue: true # Render generará una clave secreta segura
+      - key: WEB_CONCURRENCY
+        value: 4 # Número de workers Gunicorn (ajustar según plan)
+      # DATABASE_URL y REDIS_URL son inyectadas automáticamente por los servicios de abajo
+      # Añade otras variables como DEBUG=False, claves de API, etc.
+      # - key: DEBUG
+      #   value: False
+
+  # Base de Datos PostgreSQL Gestionada
+  - type: psql
+    name: mi-postgres-db # Nombre de la instancia de DB
+    databaseName: mi_app_db # Nombre de la base de datos a crear
+    user: mi_app_user # Nombre del usuario de la DB
+    plan: free # O el plan que necesites (ej: starter)
+    # Render generará una contraseña segura y creará la variable DATABASE_URL
+    # con la URL de conexión completa para los otros servicios.
+
+  # Caché Redis Gestionada
+  - type: redis
+    name: mi-redis-cache # Nombre de la instancia de Redis
+    plan: free # O el plan que necesites
+    # Render creará la variable REDIS_URL con la URL de conexión
+    # para los otros servicios.
+
+  # Worker en Segundo Plano (para RQ o Celery)
+  - type: worker
+    name: mi-rq-worker # Nombre del servicio worker
+    runtime: python
+    buildCommand: | # Mismos comandos de build que el servicio web
+      pip install --upgrade pip
+      pip install -r requirements.txt
+    startCommand: python manage.py rqworker default # Comando para iniciar tu worker (ajusta según tu cola)
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: DJANGO_SETTINGS_MODULE
+        value: tuproyecto.settings
+      # Hereda DATABASE_URL y REDIS_URL automáticamente
+      # Añade otras variables si el worker las necesita
+    plan: free # O el plan que necesites
+
+# Opcional: Previsualizaciones de Pull Request (muy útil)
+# previews:
+#   - path: /* # Activa previews para cualquier cambio en cualquier PR
+#     autoDeploy: yes # Despliega automáticamente al crear/actualizar PR
