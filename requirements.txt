@@ -1,0 +1,36 @@
+# Archivo requirements.txt de ejemplo para desplegar Django en Render
+# --------------------------------------------------------------------
+# Nota: Se recomienda fijar las versiones específicas (ej: django==4.2.11)
+#       para asegurar despliegues consistentes. Puedes generar las versiones
+#       exactas de tu entorno local con: pip freeze > requirements.txt
+
+# Core de Django
+django
+
+# Servidor WSGI para producción
+gunicorn
+
+# Servir archivos estáticos eficientemente en producción
+whitenoise
+
+# Adaptador para la base de datos PostgreSQL
+psycopg2-binary
+# Opcionalmente, puedes usar 'psycopg' si tu entorno de build puede compilarlo:
+# psycopg
+
+# Utilidad para configurar la base de datos desde la variable DATABASE_URL
+dj-database-url
+
+# Cliente de Python para Redis (necesario para caché y/o RQ)
+redis
+
+# Sistema de colas de tareas simple basado en Redis (alternativa a Celery)
+django-rq
+
+# Utilidad recomendada para manejar variables de entorno y configuraciones
+django-environ
+
+# Añade aquí cualquier otra dependencia específica de tu proyecto...
+# ejemplo: djangorestframework (si construyes una API)
+# ejemplo: Pillow (para manejo de imágenes)
+
