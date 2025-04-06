@@ -27,7 +27,7 @@ services:
       #   value: False
 
   # Base de Datos PostgreSQL Gestionada
-  - type: psql
+  - type: postgres # <-- CORREGIDO: El tipo correcto es 'postgres'
     name: mi-postgres-db # Nombre de la instancia de DB
     databaseName: mi_app_db # Nombre de la base de datos a crear
     user: mi_app_user # Nombre del usuario de la DB
